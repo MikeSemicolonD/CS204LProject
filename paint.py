@@ -34,10 +34,14 @@ class MyPaintWidget(Widget):
     def getter(self,touch):
         self.export_to_png("screen.png")
         img = Image.open("screen.png")
+        img.resize((28,28)).convert('RGBA').split()[-1].save("screen.png")
+        img = Image.open("screen.png")
+
+        
         arr = array(img)
-        #array = np.array(img)
-        #print(array) # (100, 200) {% endhighlight %}
+        #arr.resize((28,28))
         print(arr)
+        
     def clear(self,touch):
         self.canvas.clear()
         
