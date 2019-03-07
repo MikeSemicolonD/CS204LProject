@@ -9,6 +9,13 @@ from kivy.config import Config
 from kivy.uix.stencilview import StencilView
 from functools import partial
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
+import pickle
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier
+
+
+# Works relative to my path, Python has a library that can setup our directory for us.
+loaded_model = pickle.load(open("C:/Users/Mike/Jupyter/PickleObjects/DigitRecogModel", 'rb'))
 
 Window.clearcolor = (1, 1, 1, 1)
 Window.size = (800,600)
