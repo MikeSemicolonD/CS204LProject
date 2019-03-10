@@ -1,23 +1,34 @@
+import os
 import kivy
-from kivy.app import App
-from kivy.uix.widget import Widget
-from kivy.uix.label import Label
-from kivy.uix.boxlayout import BoxLayout
-from kivy.graphics import Color, Ellipse, Line, Rectangle
-from kivy.core.window import Window
-from kivy.uix.button import Button
-from kivy.uix.stencilview import StencilView
-from PIL import Image,ImageGrab
-import numpy as np 
-from numpy import array
-
 import pickle
+import numpy as np
+import pandas as pd
 
-#example_dict = {1:"6",2:"2",3:"f"}
+from kivy.app import App
+from kivy.config import Config
+from kivy.uix.label import Label
+from kivy.uix.widget import Widget
+from kivy.uix.button import Button
+from kivy.core.window import Window
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.stencilview import StencilView
+from kivy.graphics import Color, Ellipse, Line, Rectangle
 
-#pickle_out = open("dict.pickle","wb")
-#pickle.dump(example_dict, pickle_out)
-#pickle_out.close()
+from numpy import array
+from scipy import ndimage
+from PIL import Image,ImageGrab
+from sklearn.tree import DecisionTreeClassifier
+
+# Prevents that red circle from popping up when hitting right mouse button
+Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
+
+# Use this script's path to get to the model
+script_path = os.path.abspath(__file__)
+script_dir = os.path.split(script_path)[0]
+model_path = os.path.join(script_dir, "DigitRecogModel")
+
+# Load in the model
+loaded_model = pickle.load(open(model_path, 'rb'))
 
 Window.clearcolor = (1, 1, 1, 1)
 
@@ -25,27 +36,43 @@ class MyPaintWidget(Widget):
 
     def on_touch_down(self, touch):                
         with self.canvas:
-            
             Color(0, 0, 0) 
             touch.ud['line'] = Line(points=(touch.x, touch.y),width=20)
 
     def on_touch_move(self, touch):
         touch.ud['line'].points += [touch.x, touch.y]
+        
     def getter(self,touch):
         self.export_to_png("screen.png")
         img = Image.open("screen.png")
-        img.resize((28,28)).convert('RGBA').split()[-1].save("screen.png")
+        img.resize((784,784)).convert('LA').split()[-1].save("screen.png")
         img = Image.open("screen.png")
 
-        
+        # Convert to numpy array
+        img = img.resize((28,28))
         arr = array(img)
-        #arr.resize((28,28))
+
+        # Remove image
+        os.remove("screen.png")
+
+        # numpy array before reshaping
         print(arr)
+        print(arr.shape)
+
+        # Me attempting to rotate the array
+        #arr = ndimage.rotate(arr,45,cval=0)
+        
+        inputarr = arr.reshape(1,-1)
+        
+        # numpy array after reshaping
+        print(inputarr)
+        print(inputarr.shape)
+
+        # Output what the models thinks it is
+        print(loaded_model.predict(inputarr))
         
     def clear(self,touch):
         self.canvas.clear()
-        
-
 
 class MyPaintApp(App):
              
