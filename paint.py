@@ -13,6 +13,7 @@ from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.stencilview import StencilView
 from kivy.graphics import Color, Ellipse, Line, Rectangle
+from kivy.uix.effectwidget import AdvancedEffectBase, EffectWidget, EffectBase, HorizontalBlurEffect
 
 from numpy import array
 from scipy import ndimage
@@ -37,7 +38,7 @@ class MyPaintWidget(Widget):
     def on_touch_down(self, touch):                
         with self.canvas:
             Color(0, 0, 0) 
-            touch.ud['line'] = Line(points=(touch.x, touch.y),width=20)
+            touch.ud['line'] = Line(points=(touch.x, touch.y),width=10)
 
     def on_touch_move(self, touch):
         touch.ud['line'].points += [touch.x, touch.y]
@@ -47,9 +48,11 @@ class MyPaintWidget(Widget):
         img = Image.open("screen.png")
         img.resize((784,784)).convert('LA').split()[-1].save("screen.png")
         img = Image.open("screen.png")
-
+		
+        img = img.rotate(-45)
+		
         # Convert to numpy array
-        img = img.resize((28,28))
+        img = img.resize((28,28),Image.NEAREST)
         arr = array(img)
 
         # Remove image
@@ -58,9 +61,6 @@ class MyPaintWidget(Widget):
         # numpy array before reshaping
         print(arr)
         print(arr.shape)
-
-        # Me attempting to rotate the array
-        #arr = ndimage.rotate(arr,45,cval=0)
         
         inputarr = arr.reshape(1,-1)
         
@@ -77,6 +77,8 @@ class MyPaintWidget(Widget):
 class MyPaintApp(App):
              
     def build(self):
+        #blur = EffectWidget()
+        
         wid = MyPaintWidget(size_hint=(None, None), size=Window.size)
         
         screengrab_Btn = Button(text='Screen Grab/Output Pixel Values',pos=(50,50),size=(50,50))
@@ -91,8 +93,11 @@ class MyPaintApp(App):
         layout.add_widget(clear_Btn)
        
         root=BoxLayout(orientation='vertical')
+        #blur.add_widget(wid)
         root.add_widget(wid)
         root.add_widget(layout)
+
+        #blur.effects = [HorizontalBlurEffect(size=10.0)]
 
         return root
 
