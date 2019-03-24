@@ -26,9 +26,10 @@ Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 # Use this script's path to get to the model
 script_path = os.path.abspath(__file__)
 script_dir = os.path.split(script_path)[0]
+
+# model_path = "C:\Users\Mike\Jupyter\CS204LProject\"+"DigitRecogModel"
 model_path = os.path.join(script_dir, "DigitRecogModel")
 
-# Load in the model
 loaded_model = pickle.load(open(model_path, 'rb'))
 
 Window.clearcolor = (1, 1, 1, 1)
@@ -38,7 +39,7 @@ class MyPaintWidget(Widget):
     def on_touch_down(self, touch):                
         with self.canvas:
             Color(0, 0, 0) 
-            touch.ud['line'] = Line(points=(touch.x, touch.y),width=10)
+            touch.ud['line'] = Line(points=(touch.x, touch.y),width=40)
 
     def on_touch_move(self, touch):
         touch.ud['line'].points += [touch.x, touch.y]
@@ -48,28 +49,14 @@ class MyPaintWidget(Widget):
         img = Image.open("screen.png")
         img.resize((784,784)).convert('LA').split()[-1].save("screen.png")
         img = Image.open("screen.png")
-		
-        img = img.rotate(-45)
-		
-        # Convert to numpy array
+        
         img = img.resize((28,28),Image.NEAREST)
         arr = array(img)
-
-        # Remove image
+        
         os.remove("screen.png")
 
-        # numpy array before reshaping
-        print(arr)
-        print(arr.shape)
-        
-        inputarr = arr.reshape(1,-1)
-        
-        # numpy array after reshaping
-        print(inputarr)
-        print(inputarr.shape)
-
         # Output what the models thinks it is
-        print(loaded_model.predict(inputarr))
+        print(loaded_model.predict(arr.reshape(1,-1)))
         
     def clear(self,touch):
         self.canvas.clear()
@@ -77,7 +64,6 @@ class MyPaintWidget(Widget):
 class MyPaintApp(App):
              
     def build(self):
-        #blur = EffectWidget()
         
         wid = MyPaintWidget(size_hint=(None, None), size=Window.size)
         
@@ -93,11 +79,8 @@ class MyPaintApp(App):
         layout.add_widget(clear_Btn)
        
         root=BoxLayout(orientation='vertical')
-        #blur.add_widget(wid)
         root.add_widget(wid)
         root.add_widget(layout)
-
-        #blur.effects = [HorizontalBlurEffect(size=10.0)]
 
         return root
 
