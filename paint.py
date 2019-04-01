@@ -13,6 +13,7 @@ from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.stencilview import StencilView
 from kivy.graphics import Color, Ellipse, Line, Rectangle
+from kivy.properties import StringProperty
 from kivy.uix.effectwidget import AdvancedEffectBase, EffectWidget, EffectBase, HorizontalBlurEffect
 
 from numpy import array
@@ -36,6 +37,8 @@ Window.clearcolor = (1, 1, 1, 1)
 
 class MyPaintWidget(Widget):
 
+    num = StringProperty()
+
     def on_touch_down(self, touch):                
         with self.canvas:
             Color(0, 0, 0) 
@@ -57,6 +60,12 @@ class MyPaintWidget(Widget):
 
         # Output what the models thinks it is
         print(loaded_model.predict(arr.reshape(1,-1)))
+        self.num = str(loaded_model.predict(arr.reshape(1,-1)))
+        label = Label(
+            text='[ref=world][color=000000]Number: ' + self.num + '[/color][/ref]',
+            markup = True,
+            pos=(700, 500))
+        self.add_widget(label)
         
     def clear(self,touch):
         self.canvas.clear()
@@ -83,8 +92,7 @@ class MyPaintApp(App):
         root.add_widget(layout)
 
         return root
-
-    
+        
 if __name__ == '__main__':
     MyPaintApp().run()
 
