@@ -39,10 +39,21 @@ class MyPaintWidget(Widget):
 
     num = StringProperty()
 
+    numLabel = Label(
+        text='[ref=world][color=000000]Number[/color][/ref]',
+        font_size='20sp',
+        markup = True,
+        pos=(700, 500))
+    with numLabel.canvas:
+        Color(0, 0, 0, .25)
+        Rectangle(pos=numLabel.pos, size=numLabel.size)
+
+    #widget.add_widget(numLabel)
+    
     def on_touch_down(self, touch):                
         with self.canvas:
             Color(0, 0, 0) 
-            touch.ud['line'] = Line(points=(touch.x, touch.y),width=40)
+            touch.ud['line'] = Line(points=(touch.x, touch.y),width=20)
 
     def on_touch_move(self, touch):
         touch.ud['line'].points += [touch.x, touch.y]
@@ -59,13 +70,18 @@ class MyPaintWidget(Widget):
         os.remove("screen.png")
 
         # Output what the models thinks it is
-        print(loaded_model.predict(arr.reshape(1,-1)))
-        self.num = str(loaded_model.predict(arr.reshape(1,-1)))
+        print("Number: " + str(loaded_model.predict(arr.reshape(1,-1)))[1:-1])
+        self.num = str(loaded_model.predict(arr.reshape(1,-1)))[1:-1]
         label = Label(
             text='[ref=world][color=000000]Number: ' + self.num + '[/color][/ref]',
+            font_size='20sp',
             markup = True,
             pos=(700, 500))
-        self.add_widget(label)
+        with label.canvas:
+            Color(0, 0, 0, .25)
+            Rectangle(pos=label.pos, size=label.size)
+
+        self.add_widget(label)        
         
     def clear(self,touch):
         self.canvas.clear()
@@ -73,10 +89,10 @@ class MyPaintWidget(Widget):
 class MyPaintApp(App):
              
     def build(self):
-        
+
         wid = MyPaintWidget(size_hint=(None, None), size=Window.size)
         
-        screengrab_Btn = Button(text='Screen Grab/Output Pixel Values',pos=(50,50),size=(50,50))
+        screengrab_Btn = Button(text='Read Number',pos=(50,50),size=(50,50))
         screengrab_Btn.bind(on_press=wid.getter)
         
         clear_Btn = Button(text='Clear',pos=(50,50),size=(50,50))
@@ -90,6 +106,7 @@ class MyPaintApp(App):
         root=BoxLayout(orientation='vertical')
         root.add_widget(wid)
         root.add_widget(layout)
+        #screengrab_Btn.disabled = True
 
         return root
         
